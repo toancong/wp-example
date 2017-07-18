@@ -1,0 +1,60 @@
+version: '3.1'
+
+services:
+
+  site:
+    image: wordpress:4.8-php5.6-fpm
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: dbuser
+      WORDPRESS_DB_PASSWORD: user123
+    volumes:
+      - .:/var/www/html
+
+  nginx:
+    image: nginx:1.12
+    ports:
+      - 8080:8080
+    depends_on:
+      - site
+    links:
+      - site:fpm
+    volumes:
+      - ./conf/cm_rules.nginx:/etc/nginx/conf.d/cm_rules.nginx
+      - ./conf/vhost.conf:/etc/nginx/conf.d/vhost.conf
+      - ./logs/nginx:/var/log/nginx
+      - .:/var/www/html
+
+  wp:
+    image: wordpress:cli-1.2-php5.6
+    volumes:
+      - .:/var/www/html
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - ./files/database:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: user123
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8081:80
+    depends_on:
+      - db
+    environment:
+      PMA_HOSTS: db
+      PMA_USER: dbuser
+      PMA_PASSWORD: user123
+
+  wp-theme:
+    image: toancong/wp-sage:sage8.5
+    volumes:
+      - ./wp-content/themes:/usr/source
