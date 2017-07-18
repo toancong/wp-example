@@ -55,6 +55,6 @@ services:
       PMA_PASSWORD: user123
 
   wp-theme:
-    image: toancong/wp-sage:sage8.5
+    image: toancong/wp-sage:sage9
     volumes:
       - ./wp-content/themes:/usr/source
